@@ -23,7 +23,16 @@ else
     adduser -u $MSF_UID -D $MSF_USER -g $MSF_USER -G $MSF_GROUP $MSF_USER
     # add user to metasploit group so it can read the source
     addgroup $MSF_USER $METASPLOIT_GROUP
-    su-exec $MSF_USER "$@"
+
+    # Added by wo4haoren
+    if [ -z "$(ls -A /var/lib/postgresql/.msf4/)" ]; then
+        su-exec postgres ./msfdb init --component database --use-defaults
+    else
+        su-exec postgres ./msfdb start --component database
+    fi
+    cp -f /var/lib/postgresql/.msf4/database.yml config/database.yml && chown msf:msf config/database.yml
+
+    screen su-exec $MSF_USER "$@"
   # fall back to root exec if the user id already exists
   else
     "$@"
