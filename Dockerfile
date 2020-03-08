@@ -46,7 +46,7 @@ ENV METASPLOIT_GROUP=metasploit
 # used for the copy command
 RUN addgroup -S $METASPLOIT_GROUP
 
-RUN apk add --no-cache bash sqlite-libs nmap nmap-scripts nmap-nselibs postgresql-libs python python3 ncurses libcap su-exec
+RUN apk add --no-cache bash sqlite-libs nmap nmap-scripts nmap-nselibs postgresql-libs python python3 ncurses libcap su-exec screen postgresql
 
 RUN /usr/sbin/setcap cap_net_raw,cap_net_bind_service=+eip $(which ruby)
 RUN /usr/sbin/setcap cap_net_raw,cap_net_bind_service=+eip $(which nmap)
@@ -60,10 +60,22 @@ RUN cp -f $APP_HOME/docker/database.yml $APP_HOME/config/database.yml
 
 WORKDIR $APP_HOME
 
+RUN if [[ ! -f $APP_HOME/msfdb ]] ; then wget -q https://raw.githubusercontent.com/rapid7/metasploit-framework/master/msfdb -O - | sed 's/bundle thin/bundle/' > $APP_HOME/msfdb ; fi
+RUN chmod 755 msfdb && chown -R root:metasploit $APP_HOME/ \
+    && mkdir /var/run/postgresql && chown postgres:postgres /var/run/postgresql \
+	&& su-exec postgres $APP_HOME/msfdb init  --component database --use-defaults \
+	&& echo -e "termcapinfo xterm* ti@:te@\ndefscrollback 100000" > /root/.screenrc
+
+VOLUME /home/msf
+VOLUME /var/lib/postgresql/.msf4/
+
+EXPOSE 443
+EXPOSE 80
+
 # we need this entrypoint to dynamically create a user
 # matching the hosts UID and GID so we can mount something
 # from the users home directory. If the IDs don't match
 # it results in access denied errors.
 ENTRYPOINT ["docker/entrypoint.sh"]
 
-CMD ["./msfconsole", "-r", "docker/msfconsole.rc", "-y", "$APP_HOME/config/database.yml"]
+CMD ["./msfconsole", "-r", "docker/msfconsole.rc", "-y", "config/database.yml"]
