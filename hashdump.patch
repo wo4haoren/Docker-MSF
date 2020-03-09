@@ -1,0 +1,10 @@
+66a67
+>       computername = session.sys.registry.open_key(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ComputerName", KEY_READ)
+69c70
+<           address: ::Rex::Socket.getaddress(session.sock.peerhost, true),
+---
+>           address: session.session_host,
+92c93
+<         credential_data[:username]     = users[rid][:Name].downcase
+---
+>         credential_data[:username]     = computername.query_value("ComputerName").data + '\\' + users[rid][:Name].downcase
