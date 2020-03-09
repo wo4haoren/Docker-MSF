@@ -46,7 +46,7 @@ ENV METASPLOIT_GROUP=metasploit
 # used for the copy command
 RUN addgroup -S $METASPLOIT_GROUP
 
-RUN apk add --no-cache bash sqlite-libs nmap nmap-scripts nmap-nselibs postgresql-libs python python3 ncurses libcap su-exec screen postgresql vim
+RUN apk add --no-cache bash sqlite-libs nmap nmap-scripts nmap-nselibs postgresql-libs python python3 ncurses libcap su-exec screen postgresql vim patch
 
 RUN /usr/sbin/setcap cap_net_raw,cap_net_bind_service=+eip $(which ruby)
 RUN /usr/sbin/setcap cap_net_raw,cap_net_bind_service=+eip $(which nmap)
@@ -56,7 +56,6 @@ RUN chown -R root:metasploit /usr/local/bundle
 COPY . $APP_HOME/
 RUN chown -R root:metasploit $APP_HOME/
 RUN chmod 664 $APP_HOME/Gemfile.lock
-RUN cp -f $APP_HOME/docker/database.yml $APP_HOME/config/database.yml
 
 WORKDIR $APP_HOME
 
@@ -64,7 +63,9 @@ RUN if [[ ! -f $APP_HOME/msfdb ]] ; then wget -q https://raw.githubusercontent.c
 RUN chmod 755 msfdb && chown -R root:metasploit $APP_HOME/ \
     && mkdir /var/run/postgresql && chown postgres:postgres /var/run/postgresql \
 	&& su-exec postgres $APP_HOME/msfdb init  --component database --use-defaults \
-	&& echo -e "termcapinfo xterm* ti@:te@\ndefscrollback 100000" > /root/.screenrc
+	&& echo -e "termcapinfo xterm* ti@:te@\ndefscrollback 100000" > /root/.screenrc \
+    && echo -e "set mouse-=a" > /etc/vimrc \
+    && patch -i hashdump.patch modules/post/windows/gather/hashdump.rb
 
 VOLUME /home/msf
 VOLUME /var/lib/postgresql/.msf4/
