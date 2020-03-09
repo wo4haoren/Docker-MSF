@@ -1,0 +1,16 @@
+243c243
+<         next if rid == 501 or rid == 1001
+---
+>         # next if rid == 501 or rid == 1001
+262c262
+<             username: users[rid][:Name]
+---
+>             username: "#{sysinfo['Computer']}" + "\\" + users[rid][:Name]
+318c318
+<       next if rid == 501 or rid == 1001
+---
+>       # next if rid == 501 or rid == 1001
+344c344
+<             username: user
+---
+> 	    username: get_env("USERDOMAIN") + '\\' + user 
