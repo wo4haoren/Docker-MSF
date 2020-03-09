@@ -20,7 +20,7 @@ if [[ $? -eq 0 ]] ; then
 
 	cd metasploit-framework-$VER
 	cp -f ../Dockerfile .
-	cp -f ../hashdump.patch hashdump.patch
+	cp -f ../*.patch .
 	cp -f ../entrypoint.sh docker/entrypoint.sh
 	
 	if which docker >/dev/null 2>&1 ; then
