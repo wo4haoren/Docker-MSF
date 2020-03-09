@@ -65,7 +65,8 @@ RUN chmod 755 msfdb && chown -R root:metasploit $APP_HOME/ \
 	&& su-exec postgres $APP_HOME/msfdb init  --component database --use-defaults \
 	&& echo -e "termcapinfo xterm* ti@:te@\ndefscrollback 100000" > /root/.screenrc \
     && echo -e "set mouse-=a" > /etc/vimrc \
-    && patch -i hashdump.patch modules/post/windows/gather/hashdump.rb
+    && patch -i hashdump.patch modules/post/windows/gather/hashdump.rb \
+    && patch -i smart_hashdump.patch modules/post/windows/gather/smart_hashdump.rb
 
 VOLUME /home/msf
 VOLUME /var/lib/postgresql/.msf4/
