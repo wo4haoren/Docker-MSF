@@ -19,6 +19,7 @@ if [[ $? -eq 0 ]] ; then
 	fi	
 
 	cd metasploit-framework-$VER
+	sed -i -e '6 a\'$'\n''gem "pry-byebug"\'$'\n' Gemfile
 	cp -f ../Dockerfile .
 	cp -f ../*.patch .
 	cp -f ../entrypoint.sh docker/entrypoint.sh
@@ -30,6 +31,7 @@ if [[ $? -eq 0 ]] ; then
 		echo -e "\033[1;33m [-] Please install docker first.\033[0m"
         exit 1
 	fi
+	rm -rf metasploit-framework*
 else 
 	echo -e "\033[1;34m [-] Fail to download MSF source code !\033[0m"
     exit 1

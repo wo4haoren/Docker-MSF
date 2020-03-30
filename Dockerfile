@@ -29,6 +29,7 @@ RUN apk add --no-cache \
       git \
     && echo "gem: --no-document" > /etc/gemrc \
     && gem update --system 3.0.6 \
+    && gem install pry \
     && bundle install --force --clean --no-cache --system $BUNDLER_ARGS \
     # temp fix for https://github.com/bundler/bundler/issues/6680
     && rm -rf /usr/local/bundle/cache \
@@ -64,7 +65,8 @@ RUN chmod 755 msfdb && chown -R root:metasploit $APP_HOME/ \
     && mkdir /var/run/postgresql && chown postgres:postgres /var/run/postgresql \
 	&& su-exec postgres $APP_HOME/msfdb init  --component database --use-defaults \
 	&& echo -e "termcapinfo xterm* ti@:te@\ndefscrollback 100000" > /root/.screenrc \
-    && echo -e "set mouse-=a" > /etc/vimrc \
+    && echo -e "set mouse-=a" > /root/.vimrc \
+    && ln -s $APP_HOME/msf* /usr/local/bin \
     && patch -i hashdump.patch modules/post/windows/gather/hashdump.rb \
     && patch -i smart_hashdump.patch modules/post/windows/gather/smart_hashdump.rb
 
@@ -80,4 +82,4 @@ EXPOSE 80
 # it results in access denied errors.
 ENTRYPOINT ["docker/entrypoint.sh"]
 
-CMD ["./msfconsole", "-r", "docker/msfconsole.rc", "-y", "config/database.yml"]
+CMD ["./msfconsole", "-y", "config/database.yml"]
